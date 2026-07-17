@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caixa de Ferramentas — Texto &amp; Utilitários</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ECEAE3;
+    --panel: #FFFFFF;
+    --ink: #21262B;
+    --ink-soft: #565F63;
+    --accent: #E8A93B;
+    --accent-ink: #4A3106;
+    --accent2: #35606E;
+    --line: #CDC8BB;
+    --hole: #D8D3C4;
+    --danger: #B5482F;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(var(--hole) 1.6px, transparent 1.6px) 0 0/26px 26px,
+      var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+  }
+  ::selection{ background:var(--accent); color:var(--accent-ink); }
+
+  /* ---------- layout ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width: 860px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{position:static; height:auto; max-height:none;}
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    background:var(--ink);
+    color:#EFEDE6;
+    padding:22px 16px 30px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{
+    font-family:'Archivo Black', sans-serif;
+    font-size:19px;
+    letter-spacing:0.02em;
+    line-height:1.15;
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:4px;
+  }
+  .brand .peg{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px rgba(232,169,59,0.25);
+    flex:none;
+  }
+  .brand-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:#9AA3A6;
+    margin:0 0 20px 24px;
+    letter-spacing:0.04em;
+  }
+  .search{
+    width:100%;
+    padding:9px 12px;
+    border-radius:8px;
+    border:1px solid #3B4247;
+    background:#2A3136;
+    color:#EFEDE6;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13px;
+    margin-bottom:18px;
+    outline:none;
+  }
+  .search::placeholder{color:#7C858A;}
+  .search:focus{border-color:var(--accent);}
+
+  .cat{ margin-bottom:6px; }
+  .cat-head{
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:#9AA3A6;
+    padding:10px 6px 6px;
+    border-top:1px dashed #3B4247;
+    margin-top:6px;
+  }
+  .cat:first-of-type .cat-head{ border-top:none; margin-top:0;}
+  .tool-btn{
+    display:flex; align-items:center; gap:9px;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    color:#D9D6CC;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13.5px;
+    padding:8px 8px 8px 6px;
+    border-radius:7px;
+    cursor:pointer;
+    line-height:1.25;
+  }
+  .tool-btn:hover{ background:#2A3136; color:#fff; }
+  .tool-btn.active{ background:var(--accent); color:var(--accent-ink); font-weight:600; }
+  .tool-btn .ic{
+    flex:none; width:20px; text-align:center;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; opacity:0.85;
+  }
+  .tool-btn.hidden{ display:none; }
+
+  /* ---------- main ---------- */
+  main{ padding:36px 40px 60px; max-width:900px; }
+  @media (max-width:600px){ main{padding:22px 16px 50px;} }
+
+  .tool-header{ margin-bottom:22px; }
+  .tool-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--accent2); margin:0 0 6px;
+  }
+  .tool-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:30px; margin:0 0 8px; line-height:1.1;
+  }
+  .tool-desc{ color:var(--ink-soft); font-size:14.5px; max-width:60ch; margin:0; }
+
+  .card{
+    background:var(--panel);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    padding:24px;
+    position:relative;
+    margin-bottom:18px;
+  }
+  .card::before, .card::after{
+    content:"";
+    position:absolute; top:-8px;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--bg);
+    border:1px solid var(--line);
+  }
+  .card::before{ left:22px; }
+  .card::after{ left:46px; }
+
+  label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;}
+  textarea, input[type=text], input[type=number], select{
+    width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    padding:11px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#FBFAF7;
+    color:var(--ink);
+    resize:vertical;
+    outline:none;
+  }
+  textarea:focus, input:focus, select:focus{ border-color:var(--accent2); }
+  textarea{ min-height:120px; line-height:1.5; }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .row > div{ flex:1; min-width:140px; }
+  .row.tight > div{ min-width:100px; }
+
+  .btn{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600; font-size:13.5px;
+    padding:10px 18px;
+    border-radius:8px;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    cursor:pointer;
+  }
+  .btn:hover{ background:#3A4247; }
+  .btn.accent{ background:var(--accent); color:var(--accent-ink); }
+  .btn.accent:hover{ filter:brightness(0.95); }
+  .btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn.ghost:hover{ background:#F1EFE9; }
+  .btn.small{ padding:7px 12px; font-size:12.5px; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 4px; align-items:center; }
+
+  .chk{ display:flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-soft); margin:6px 0; }
+  .chk input{ width:auto; }
+
+  .out-wrap{ position:relative; margin-top:14px; }
+  .out-label{ display:flex; justify-content:space-between; align-items:center; }
+  .copy-btn{
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    background:none; border:1px solid var(--line); border-radius:6px;
+    padding:4px 9px; cursor:pointer; color:var(--ink-soft);
+  }
+  .copy-btn:hover{ border-color:var(--accent2); color:var(--accent2); }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; margin-top:16px;}
+  .stat{ background:#FBFAF7; border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .stat b{ display:block; font-family:'Archivo Black', sans-serif; font-size:22px; color:var(--accent2); }
+  .stat span{ font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em;}
+
+  .variant{ background:#FBFAF7; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .variant span{ font-size:15px; word-break:break-word; }
+  .variant button{ flex:none; }
+
+  .pill{ display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:11px; background:var(--accent); color:var(--accent-ink); padding:3px 9px; border-radius:20px; margin-left:8px;}
+
+  footer{ margin-top:30px; font-size:12px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace;}
+
+  .tool-section{ display:none; }
+  .tool-section.active{ display:block; }
+
+  #winner-box{ font-family:'Archivo Black', sans-serif; font-size:26px; color:var(--accent2); text-align:center; padding:20px; display:none;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="peg"></span>CAIXA DE<br>FERRAMENTAS</div>
+    <p class="brand-sub">TEXTO · CRIPTO · ALEATÓRIO</p>
+    <input class="search" id="search" type="text" placeholder="Buscar ferramenta...">
+    <nav id="nav"></nav>
+  </aside>
+
+  <main>
+    <div id="tools-container"></div>
+    <footer>Rodando 100% local, no seu navegador. Nenhum texto sai da sua máquina.</footer>
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   DEFINIÇÃO DAS FERRAMENTAS
+   ========================================================= */
+const CATEGORIES = [
+  { name: "Manipulação de Texto", tools: [
+    "inverter-texto","maiusculas-minusculas","remover-duplicadas","ordem-alfabetica",
+    "cabeca-para-baixo","letras-diferentes","prefixo-sufixo","localizar-substituir"
+  ]},
+  { name: "Análise de Texto", tools: ["contador-caracteres"] },
+  { name: "Criptografia e Códigos", tools: ["codigo-binario","codigo-morse","numeros-romanos","conversao-base"] },
+  { name: "Aleatório", tools: ["gerador-senha","gerador-uuid","sorteio","lista-aleatoria","numeros-aleatorios"] },
+  { name: "Desenvolvedor", tools: ["lorem-ipsum"] },
+  { name: "Números", tools: ["calculadora-porcentagem"] },
+];
+
+const TOOLS = {
+  "inverter-texto": { icon:"⇄", title:"Inverter Texto", desc:"Gera um novo texto com a ordem dos caracteres invertida." },
+  "maiusculas-minusculas": { icon:"Aa", title:"Maiúsculas e Minúsculas", desc:"Converte o texto para MAIÚSCULAS, minúsculas, Capitalizado ou Alternado." },
+  "remover-duplicadas": { icon:"≠", title:"Remover Linhas Duplicadas", desc:"Remove as linhas repetidas de uma lista, mantendo a primeira ocorrência." },
+  "ordem-alfabetica": { icon:"A-Z", title:"Ordem Alfabética", desc:"Coloca as linhas de uma lista em ordem alfabética crescente ou decrescente." },
+  "cabeca-para-baixo": { icon:"ɔqɐ", title:"Texto de Cabeça para Baixo", desc:"Vira seu texto de cabeça para baixo (útil para brincadeiras e redes sociais)." },
+  "letras-diferentes": { icon:"Ⓐ", title:"Letras Diferentes", desc:"Converte o texto em estilos unicode (bolha, negrito, script, monoespaçado...) para postar nas redes sociais." },
+  "prefixo-sufixo": { icon:"[ ]", title:"Prefixo e Sufixo", desc:"Adiciona um prefixo e/ou sufixo em cada linha do texto." },
+  "localizar-substituir": { icon:"🔍", title:"Localizar e Substituir", desc:"Localiza todas as ocorrências de um trecho de texto e substitui por outro." },
+  "contador-caracteres": { icon:"123", title:"Contador de Caracteres", desc:"Calcula quantos caracteres, palavras, linhas e frases existem no texto." },
+  "codigo-binario": { icon:"0110", title:"Código Binário", desc:"Transforma texto em código binário e vice-versa." },
+  "codigo-morse": { icon:"·−", title:"Código Morse", desc:"Transforma texto em código morse e vice-versa." },
+  "numeros-romanos": { icon:"IV", title:"Números Romanos", desc:"Converte números decimais para romanos e vice-versa." },
+  "conversao-base": { icon:"0x", title:"Conversão de Base Numérica", desc:"Converte um número entre as bases decimal, binária, octal e hexadecimal." },
+  "gerador-senha": { icon:"••", title:"Gerador de Senha", desc:"Gera senhas aleatórias fortes com opções de tamanho e caracteres." },
+  "gerador-uuid": { icon:"#", title:"Gerador de UUID", desc:"Gera identificadores únicos universais (UUID v4) para bancos de dados e APIs." },
+  "sorteio": { icon:"🎲", title:"Sorteio", desc:"Escolhe um nome aleatório dentro de uma lista." },
+  "lista-aleatoria": { icon:"⇅", title:"Lista Aleatória", desc:"Coloca uma lista em ordem aleatória (embaralha as linhas)." },
+  "numeros-aleatorios": { icon:"⚄", title:"Números Aleatórios", desc:"Gera números aleatórios dentro de um intervalo, com ou sem repetição." },
+  "lorem-ipsum": { icon:"¶", title:"Gerador de Lorem Ipsum", desc:"Gera textos de preenchimento (lorem ipsum) por parágrafos, frases ou palavras." },
+  "calculadora-porcentagem": { icon:"%", title:"Calculadora de Porcentagem", desc:"Calcula porcentagens, aumento, desconto e variação entre valores." },
+};
+
+/* =========================================================
+   MONTAGEM DA SIDEBAR
+   ========================================================= */
+const nav = document.getElementById('nav');
+CATEGORIES.forEach(cat=>{
+  const catEl = document.createElement('div');
+  catEl.className='cat';
+  const head = document.createElement('div');
+  head.className='cat-head';
+  head.textContent = cat.name;
+  catEl.appendChild(head);
+  cat.tools.forEach(id=>{
+    const t = TOOLS[id];
+    const b = document.createElement('button');
+    b.className='tool-btn';
+    b.dataset.id = id;
+    b.dataset.label = (t.title+" "+t.desc).toLowerCase();
+    b.innerHTML = `<span class="ic">${t.icon}</span><span>${t.title}</span>`;
+    b.onclick = ()=>selectTool(id);
+    catEl.appendChild(b);
+  });
+  nav.appendChild(catEl);
+});
+
+document.getElementById('search').addEventListener('input', (e)=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.tool-btn').forEach(b=>{
+    b.classList.toggle('hidden', q && !b.dataset.label.includes(q));
+  });
+});
+
+function selectTool(id){
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  document.querySelectorAll('.tool-section').forEach(s=>s.classList.toggle('active', s.id==='sec-'+id));
+  window.scrollTo(0,0);
+}
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function el(id){ return document.getElementById(id); }
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    if(btn){ const old=btn.textContent; btn.textContent='Copiado!'; setTimeout(()=>btn.textContent=old,1200); }
+  });
+}
+function makeSection(id, bodyHtml){
+  const container = document.getElementById('tools-container');
+  const t = TOOLS[id];
+  const sec = document.createElement('section');
+  sec.className='tool-section';
+  sec.id='sec-'+id;
+  sec.innerHTML = `
+    <div class="tool-header">
+      <p class="tool-eyebrow">Ferramenta</p>
+      <h1 class="tool-title">${t.title}</h1>
+      <p class="tool-desc">${t.desc}</p>
+    </div>
+    ${bodyHtml}
+  `;
+  container.appendChild(sec);
+}
+
+/* =========================================================
+   1. INVERTER TEXTO
+   ========================================================= */
+makeSection("inverter-texto", `
+  <div class="card">
+    <label for="inv-in">Seu texto</label>
+    <textarea id="inv-in" placeholder="Digite algo aqui...">Gosto muito de café pela manhã</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="runInverter()">Inverter</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="inv-copy" onclick="copyText(el('inv-out').value, el('inv-copy'))">Copiar</button></div>
+      <textarea id="inv-out" readonly></textarea>
+    </div>
+  </div>
+`);
+function runInverter(){
+  const v = el('inv-in').value;
+  el('inv-out').value = [...v].reverse().join('');
+}
+runInverter();
+
+/* =========================================================
+   2. MAIÚSCULAS E MINÚSCULAS
+   ========================================================= */
+makeSection("maiusculas-minusculas", `
+  <div class="card">
+    <label for="case-in">Seu texto</label>
+    <textarea id="case-in">o rato roeu a roupa do rei de roma</textarea>
+    <div class="btn-row">
+      <button class="btn" onclick="runCase('upper')">MAIÚSCULAS</button>
+      <button class="btn" onclick="runCase('lower')">minúsculas</button>
+      <button class="btn" onclick="runCase('title')">Capitalizado</button>
+      <button class="btn" onclick="runCase('sentence')">Primeira maiúscula</button>
+      <button class="btn" onclick="runCase('invert')">iNVERTIDO</button>
+    </div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="case-copy" onclick="copyText(el('case-out').value, el('case-copy'))">Copiar</button></div>
+      <textarea id="case-out" readonly></textarea>
+    </div>
+  </div>
+`);
+function runCase(mode){
+  const v = el('case-in').value;
+  let out = v;
+  if(mode==='upper') out = v.toUpperCase();
+  else if(mode==='lower') out = v.toLowerCase();
+  else if(mode==='title') out = v.toLowerCase().replace(/(^|\s)\S/g, c=>c.toUpperCase());
+  else if(mode==='sentence') out = v.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c=>c.toUpperCase());
+  else if(mode==='invert') out = [...v].map(c=> c===c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join('');
+  el('case-out').value = out;
+}
+runCase('upper');
+
+/* =========================================================
+   3. REMOVER LINHAS DUPLICADAS
+   ========================================================= */
+makeSection("remover-duplicadas", `
+  <div class="card">
+    <label for="dup-in">Sua lista (uma entrada por linha)</label>
+    <textarea id="dup-in" style="min-height:160px">maçã
+banana
+maçã
+uva
+banana
+laranja</textarea>
+    <div class="row tight">
+      <div class="chk"><input type="checkbox" id="dup-ci"><label for="dup-ci" style="margin:0;text-transform:none;font-weight:400;">Ignorar maiúsculas/minúsculas</label></div>
+      <div class="chk"><input type="checkbox" id="dup-trim" checked><label for="dup-trim" style="margin:0;text-transform:none;font-weight:400;">Ignorar espaços extras</label></div>
+    </div>
+    <div class="btn-row"><button class="btn accent" onclick="runDedupe()">Remover duplicadas</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="dup-copy" onclick="copyText(el('dup-out').value, el('dup-copy'))">Copiar</button></div>
+      <textarea id="dup-out" readonly style="min-height:160px"></textarea>
+    </div>
+  </div>
+`);
+function runDedupe(){
+  let lines = el('dup-in').value.split('\n');
+  const ci = el('dup-ci').checked, trim = el('dup-trim').checked;
+  const seen = new Set();
+  const out = [];
+  lines.forEach(line=>{
+    let key = trim ? line.trim() : line;
+    if(ci) key = key.toLowerCase();
+    if(!seen.has(key)){ seen.add(key); out.push(line); }
+  });
+  el('dup-out').value = out.join('\n');
+}
+runDedupe();
+
+/* =========================================================
+   4. ORDEM ALFABÉTICA
+   ========================================================= */
+makeSection("ordem-alfabetica", `
+  <div class="card">
+    <label for="alpha-in">Sua lista (uma entrada por linha)</label>
+    <textarea id="alpha-in" style="min-height:160px">Zebra
+Abacaxi
+Manga
+Caju</textarea>
+    <div class="btn-row">
+      <button class="btn accent" onclick="runAlpha(false)">A → Z</button>
+      <button class="btn" onclick="runAlpha(true)">Z → A</button>
+    </div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="alpha-copy" onclick="copyText(el('alpha-out').value, el('alpha-copy'))">Copiar</button></div>
+      <textarea id="alpha-out" readonly style="min-height:160px"></textarea>
+    </div>
+  </div>
+`);
+function runAlpha(desc){
+  let lines = el('alpha-in').value.split('\n').filter(l=>l.length);
+  lines.sort((a,b)=> a.localeCompare(b, 'pt-BR', {sensitivity:'base'}));
+  if(desc) lines.reverse();
+  el('alpha-out').value = lines.join('\n');
+}
+runAlpha(false);
+
+/* =========================================================
+   5. CABEÇA PARA BAIXO
+   ========================================================= */
+const UPSIDE_MAP = {
+  a:'ɐ',b:'q',c:'ɔ',d:'p',e:'ǝ',f:'ɟ',g:'ƃ',h:'ɥ',i:'ı',j:'ɾ',k:'ʞ',l:'ן',m:'ɯ',n:'u',o:'o',
+  p:'d',q:'b',r:'ɹ',s:'s',t:'ʇ',u:'n',v:'ʌ',w:'ʍ',x:'x',y:'ʎ',z:'z',
+  A:'∀',B:'Ԑ',C:'Ɔ',D:'ᗡ',E:'Ǝ',F:'Ⅎ',G:'⅁',H:'H',I:'I',J:'ſ',K:'Ʞ',L:'˥',M:'W',N:'N',O:'O',
+  P:'Ԁ',Q:'Ό',R:'ᴚ',S:'S',T:'⊥',U:'∩',V:'Λ',W:'M',X:'X',Y:'⅄',Z:'Z',
+  0:'0',1:'Ɩ',2:'ᄅ',3:'Ɛ',4:'ㄣ',5:'ϛ',6:'9',7:'ㄥ',8:'8',9:'6',
+  '.':'˙',',':"'",'?':'¿','!':'¡',"'":',','"':',,',
+};
+makeSection("cabeca-para-baixo", `
+  <div class="card">
+    <label for="upside-in">Seu texto</label>
+    <textarea id="upside-in">isso é muito engraçado</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="runUpside()">Virar de cabeça para baixo</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="upside-copy" onclick="copyText(el('upside-out').value, el('upside-copy'))">Copiar</button></div>
+      <textarea id="upside-out" readonly></textarea>
+    </div>
+  </div>
+`);
+function runUpside(){
+  const v = el('upside-in').value;
+  const flipped = [...v].map(c=> UPSIDE_MAP[c] !== undefined ? UPSIDE_MAP[c] : c).reverse().join('');
+  el('upside-out').value = flipped;
+}
+runUpside();
+
+/* =========================================================
+   6. LETRAS DIFERENTES (fontes unicode)
+   ========================================================= */
+const FONT_STYLES = [
+  { name:"Negrito (𝐛𝐨𝐥𝐝)", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    "𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗") },
+  { name:"Itálico (𝑖𝑡á𝑙𝑖𝑐𝑜)", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍") },
+  { name:"Script (𝓼𝓬𝓻𝓲𝓹𝓽)", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩") },
+  { name:"Monoespaçado (𝚖𝚘𝚗𝚘)", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    "𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿") },
+  { name:"Bolha ⒷⓄⓁⒽⒶ", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    "ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ⓪①②③④⑤⑥⑦⑧⑨") },
+  { name:"Quadrado 🅵🅰🅽🆃", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉") },
+  { name:"Fullwidth （ｆｕｌｌ）", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+    "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９") },
+  { name:"Gótico 𝔤𝔬𝔱𝔦𝔠𝔬", map: buildMap(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ") },
+];
+function buildMap(from, to){
+  const arrFrom = [...from], arrTo = [...to];
+  const map = {};
+  arrFrom.forEach((c,i)=> map[c]=arrTo[i]);
+  return map;
+}
+function applyFontStyle(text, map){
+  return [...text].map(c=> map[c] !== undefined ? map[c] : c).join('');
+}
+makeSection("letras-diferentes", `
+  <div class="card">
+    <label for="fancy-in">Seu texto</label>
+    <textarea id="fancy-in">Bom dia a todos</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="runFancy()">Gerar estilos</button></div>
+  </div>
+  <div id="fancy-out"></div>
+`);
+function runFancy(){
+  const v = el('fancy-in').value;
+  const box = el('fancy-out');
+  box.innerHTML = '';
+  FONT_STYLES.forEach((style, idx)=>{
+    const converted = applyFontStyle(v, style.map);
+    const wrap = document.createElement('div');
+    wrap.className='variant';
+    wrap.innerHTML = `<span>${converted || '(vazio)'}</span><button class="btn small ghost" onclick="copyText(${JSON.stringify(converted)}, this)">Copiar</button>`;
+    box.appendChild(wrap);
+  });
+}
+runFancy();
+
+/* =========================================================
+   7. PREFIXO E SUFIXO
+   ========================================================= */
+makeSection("prefixo-sufixo", `
+  <div class="card">
+    <label for="ps-in">Sua lista (uma entrada por linha)</label>
+    <textarea id="ps-in" style="min-height:150px">produto1
+produto2
+produto3</textarea>
+    <div class="row">
+      <div><label for="ps-pre">Prefixo</label><input type="text" id="ps-pre" value="- "></div>
+      <div><label for="ps-suf">Sufixo</label><input type="text" id="ps-suf" value=";"></div>
+    </div>
+    <div class="btn-row"><button class="btn accent" onclick="runPrefixSufix()">Aplicar</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="ps-copy" onclick="copyText(el('ps-out').value, el('ps-copy'))">Copiar</button></div>
+      <textarea id="ps-out" readonly style="min-height:150px"></textarea>
+    </div>
+  </div>
+`);
+function runPrefixSufix(){
+  const pre = el('ps-pre').value, suf = el('ps-suf').value;
+  const lines = el('ps-in').value.split('\n');
+  el('ps-out').value = lines.map(l=> l.length ? pre+l+suf : l).join('\n');
+}
+runPrefixSufix();
+
+/* =========================================================
+   8. LOCALIZAR E SUBSTITUIR
+   ========================================================= */
+makeSection("localizar-substituir", `
+  <div class="card">
+    <label for="fr-in">Seu texto</label>
+    <textarea id="fr-in" style="min-height:150px">O gato subiu no telhado. O gato desceu depois.</textarea>
+    <div class="row">
+      <div><label for="fr-find">Localizar</label><input type="text" id="fr-find" value="gato"></div>
+      <div><label for="fr-replace">Substituir por</label><input type="text" id="fr-replace" value="cachorro"></div>
+    </div>
+    <div class="chk"><input type="checkbox" id="fr-ci"><label for="fr-ci" style="margin:0;text-transform:none;font-weight:400;">Ignorar maiúsculas/minúsculas</label></div>
+    <div class="btn-row"><button class="btn accent" onclick="runFindReplace()">Substituir</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="fr-copy" onclick="copyText(el('fr-out').value, el('fr-copy'))">Copiar</button></div>
+      <textarea id="fr-out" readonly style="min-height:150px"></textarea>
+    </div>
+  </div>
+`);
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function runFindReplace(){
+  const text = el('fr-in').value;
+  const find = el('fr-find').value;
+  const replace = el('fr-replace').value;
+  const ci = el('fr-ci').checked;
+  if(!find){ el('fr-out').value = text; return; }
+  const re = new RegExp(escapeRegex(find), ci ? 'gi' : 'g');
+  el('fr-out').value = text.replace(re, replace);
+}
+runFindReplace();
+
+/* =========================================================
+   9. CONTADOR DE CARACTERES
+   ========================================================= */
+makeSection("contador-caracteres", `
+  <div class="card">
+    <label for="count-in">Seu texto</label>
+    <textarea id="count-in" style="min-height:170px" oninput="runCounter()">A vida é feita de pequenos momentos que, juntos, contam uma grande história.</textarea>
+    <div class="stat-grid" id="count-out"></div>
+  </div>
+`);
+function runCounter(){
+  const v = el('count-in').value;
+  const chars = v.length;
+  const charsNoSpace = v.replace(/\s/g,'').length;
+  const words = v.trim().length ? v.trim().split(/\s+/).length : 0;
+  const lines = v.length ? v.split('\n').length : 0;
+  const sentences = (v.match(/[.!?]+/g) || []).length;
+  const bytes = new Blob([v]).size;
+  el('count-out').innerHTML = `
+    <div class="stat"><b>${chars}</b><span>Caracteres</span></div>
+    <div class="stat"><b>${charsNoSpace}</b><span>Sem espaços</span></div>
+    <div class="stat"><b>${words}</b><span>Palavras</span></div>
+    <div class="stat"><b>${lines}</b><span>Linhas</span></div>
+    <div class="stat"><b>${sentences}</b><span>Frases</span></div>
+    <div class="stat"><b>${bytes}</b><span>Bytes (UTF-8)</span></div>
+  `;
+}
+runCounter();
+
+/* =========================================================
+   10. CÓDIGO BINÁRIO
+   ========================================================= */
+makeSection("codigo-binario", `
+  <div class="card">
+    <label for="bin-in">Texto</label>
+    <textarea id="bin-in">Olá mundo</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="textToBinary()">Texto → Binário</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Binário</label><button class="copy-btn" id="bin-copy" onclick="copyText(el('bin-out').value, el('bin-copy'))">Copiar</button></div>
+      <textarea id="bin-out" readonly></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <label for="bin-in2">Binário</label>
+    <textarea id="bin-in2">01001111 01101100 11000011 10100001 00100000 01101101 01110101 01101110 01100100 01101111</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="binaryToText()">Binário → Texto</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Texto</label><button class="copy-btn" id="bin-copy2" onclick="copyText(el('bin-out2').value, el('bin-copy2'))">Copiar</button></div>
+      <textarea id="bin-out2" readonly></textarea>
+    </div>
+  </div>
+`);
+function textToBinary(){
+  const bytes = new TextEncoder().encode(el('bin-in').value);
+  el('bin-out').value = Array.from(bytes).map(b=> b.toString(2).padStart(8,'0')).join(' ');
+}
+function binaryToText(){
+  try{
+    const chunks = el('bin-in2').value.trim().split(/\s+/).filter(Boolean);
+    const bytes = new Uint8Array(chunks.map(c=> parseInt(c,2)));
+    el('bin-out2').value = new TextDecoder().decode(bytes);
+  }catch(e){ el('bin-out2').value = 'Binário inválido.'; }
+}
+textToBinary(); binaryToText();
+
+/* =========================================================
+   11. CÓDIGO MORSE
+   ========================================================= */
+const MORSE_MAP = {
+  A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',
+  M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',
+  0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.',
+  '.':'.-.-.-',',':'--..--','?':'..--..',"'":'.----.','!':'-.-.--','/':'-..-.','(': '-.--.',')':'-.--.-',
+  '&':'.-...',':':'---...',';':'-.-.-.','=':'-...-','+':'.-.-.','-':'-....-','_':'..--.-','"':'.-..-.','$':'...-..-','@':'.--.-.'
+};
+const MORSE_MAP_REV = Object.fromEntries(Object.entries(MORSE_MAP).map(([k,v])=>[v,k]));
+makeSection("codigo-morse", `
+  <div class="card">
+    <label for="morse-in">Texto</label>
+    <textarea id="morse-in">SOS</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="textToMorse()">Texto → Morse</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Morse</label><button class="copy-btn" id="morse-copy" onclick="copyText(el('morse-out').value, el('morse-copy'))">Copiar</button></div>
+      <textarea id="morse-out" readonly></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <label for="morse-in2">Morse (separe letras com espaço e palavras com "/")</label>
+    <textarea id="morse-in2">... --- ...</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="morseToText()">Morse → Texto</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Texto</label><button class="copy-btn" id="morse-copy2" onclick="copyText(el('morse-out2').value, el('morse-copy2'))">Copiar</button></div>
+      <textarea id="morse-out2" readonly></textarea>
+    </div>
+  </div>
+`);
+function textToMorse(){
+  const v = el('morse-in').value.toUpperCase();
+  const words = v.split(' ');
+  el('morse-out').value = words.map(w=> [...w].map(c=> MORSE_MAP[c] !== undefined ? MORSE_MAP[c] : '').filter(Boolean).join(' ')).join(' / ');
+}
+function morseToText(){
+  const v = el('morse-in2').value.trim();
+  const words = v.split('/');
+  el('morse-out2').value = words.map(w=> w.trim().split(/\s+/).map(code=> MORSE_MAP_REV[code] || '').join('')).join(' ');
+}
+textToMorse(); morseToText();
+
+/* =========================================================
+   12. NÚMEROS ROMANOS
+   ========================================================= */
+function toRoman(num){
+  if(num<=0 || num>3999) return 'Use um número entre 1 e 3999';
+  const vals = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out='';
+  for(const [v,s] of vals){ while(num>=v){ out+=s; num-=v; } }
+  return out;
+}
+function fromRoman(str){
+  const vals = {I:1,V:5,X:10,L:50,C:100,D:500,M:1000};
+  str = str.toUpperCase().trim();
+  if(!/^[IVXLCDM]+$/.test(str)) return 'Numeral romano inválido';
+  let total=0;
+  for(let i=0;i<str.length;i++){
+    const cur = vals[str[i]], next = vals[str[i+1]];
+    if(next && cur<next) total -= cur; else total += cur;
+  }
+  return total;
+}
+makeSection("numeros-romanos", `
+  <div class="row">
+    <div class="card" style="flex:1;">
+      <label for="rom-in">Número decimal</label>
+      <input type="number" id="rom-in" value="1994" min="1" max="3999">
+      <div class="btn-row"><button class="btn accent" onclick="el('rom-out').value = toRoman(parseInt(el('rom-in').value||0))">Converter</button></div>
+      <div class="out-wrap">
+        <div class="out-label"><label>Romano</label><button class="copy-btn" onclick="copyText(el('rom-out').value, this)">Copiar</button></div>
+        <input type="text" id="rom-out" readonly>
+      </div>
+    </div>
+    <div class="card" style="flex:1;">
+      <label for="rom-in2">Número romano</label>
+      <input type="text" id="rom-in2" value="MCMXCIV">
+      <div class="btn-row"><button class="btn accent" onclick="el('rom-out2').value = fromRoman(el('rom-in2').value)">Converter</button></div>
+      <div class="out-wrap">
+        <div class="out-label"><label>Decimal</label><button class="copy-btn" onclick="copyText(String(el('rom-out2').value), this)">Copiar</button></div>
+        <input type="text" id="rom-out2" readonly>
+      </div>
+    </div>
+  </div>
+`);
+el('rom-out').value = toRoman(1994);
+el('rom-out2').value = fromRoman('MCMXCIV');
+
+/* =========================================================
+   13. CONVERSÃO DE BASE NUMÉRICA
+   ========================================================= */
+makeSection("conversao-base", `
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="base-in">Número</label>
+        <input type="text" id="base-in" value="255">
+      </div>
+      <div>
+        <label for="base-from">De qual base</label>
+        <select id="base-from">
+          <option value="10" selected>Decimal (10)</option>
+          <option value="2">Binário (2)</option>
+          <option value="8">Octal (8)</option>
+          <option value="16">Hexadecimal (16)</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn accent" onclick="runBaseConvert()">Converter para todas as bases</button></div>
+    <div class="stat-grid" id="base-out"></div>
+  </div>
+`);
+function runBaseConvert(){
+  const raw = el('base-in').value.trim();
+  const from = parseInt(el('base-from').value);
+  const box = el('base-out');
+  const num = parseInt(raw, from);
+  if(isNaN(num)){ box.innerHTML = '<div class="stat"><b>—</b><span>Número inválido para essa base</span></div>'; return; }
+  box.innerHTML = `
+    <div class="stat"><b>${num.toString(10)}</b><span>Decimal</span></div>
+    <div class="stat"><b>${num.toString(2)}</b><span>Binário</span></div>
+    <div class="stat"><b>${num.toString(8)}</b><span>Octal</span></div>
+    <div class="stat"><b>${num.toString(16).toUpperCase()}</b><span>Hexadecimal</span></div>
+  `;
+}
+runBaseConvert();
+
+/* =========================================================
+   14. GERADOR DE SENHA
+   ========================================================= */
+makeSection("gerador-senha", `
+  <div class="card">
+    <div class="row">
+      <div><label for="pw-len">Tamanho: <span id="pw-len-val">16</span></label>
+        <input type="range" id="pw-len" min="4" max="64" value="16" oninput="el('pw-len-val').textContent=el('pw-len').value">
+      </div>
+    </div>
+    <div class="chk"><input type="checkbox" id="pw-upper" checked><label for="pw-upper" style="margin:0;text-transform:none;font-weight:400;">Letras maiúsculas (A-Z)</label></div>
+    <div class="chk"><input type="checkbox" id="pw-lower" checked><label for="pw-lower" style="margin:0;text-transform:none;font-weight:400;">Letras minúsculas (a-z)</label></div>
+    <div class="chk"><input type="checkbox" id="pw-num" checked><label for="pw-num" style="margin:0;text-transform:none;font-weight:400;">Números (0-9)</label></div>
+    <div class="chk"><input type="checkbox" id="pw-sym"><label for="pw-sym" style="margin:0;text-transform:none;font-weight:400;">Símbolos (!@#$%...)</label></div>
+    <div class="chk"><input type="checkbox" id="pw-ambig"><label for="pw-ambig" style="margin:0;text-transform:none;font-weight:400;">Excluir caracteres ambíguos (l, 1, I, 0, O)</label></div>
+    <div class="btn-row"><button class="btn accent" onclick="runPassword()">Gerar senha</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Senha gerada</label><button class="copy-btn" id="pw-copy" onclick="copyText(el('pw-out').value, el('pw-copy'))">Copiar</button></div>
+      <input type="text" id="pw-out" readonly style="font-size:17px;letter-spacing:0.02em;">
+    </div>
+  </div>
+`);
+function runPassword(){
+  let chars = '';
+  if(el('pw-upper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if(el('pw-lower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
+  if(el('pw-num').checked) chars += '0123456789';
+  if(el('pw-sym').checked) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  if(el('pw-ambig').checked) chars = chars.replace(/[lI1O0]/g,'');
+  if(!chars){ el('pw-out').value = 'Selecione ao menos um tipo de caractere'; return; }
+  const len = parseInt(el('pw-len').value);
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  let pass = '';
+  for(let i=0;i<len;i++){ pass += chars[arr[i] % chars.length]; }
+  el('pw-out').value = pass;
+}
+runPassword();
+
+/* =========================================================
+   15. GERADOR DE UUID
+   ========================================================= */
+makeSection("gerador-uuid", `
+  <div class="card">
+    <div class="row tight">
+      <div><label for="uuid-qty">Quantidade</label><input type="number" id="uuid-qty" value="5" min="1" max="100"></div>
+    </div>
+    <div class="btn-row"><button class="btn accent" onclick="runUuid()">Gerar UUIDs</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="uuid-copy" onclick="copyText(el('uuid-out').value, el('uuid-copy'))">Copiar todos</button></div>
+      <textarea id="uuid-out" readonly style="min-height:150px"></textarea>
+    </div>
+  </div>
+`);
+function runUuid(){
+  const qty = Math.min(100, Math.max(1, parseInt(el('uuid-qty').value)||1));
+  const list = [];
+  for(let i=0;i<qty;i++) list.push(crypto.randomUUID());
+  el('uuid-out').value = list.join('\n');
+}
+runUuid();
+
+/* =========================================================
+   16. SORTEIO
+   ========================================================= */
+makeSection("sorteio", `
+  <div class="card">
+    <label for="raffle-in">Lista de participantes (um por linha)</label>
+    <textarea id="raffle-in" style="min-height:150px">Ana
+Bruno
+Carla
+Diego
+Elisa</textarea>
+    <div class="chk"><input type="checkbox" id="raffle-remove"><label for="raffle-remove" style="margin:0;text-transform:none;font-weight:400;">Remover o vencedor da lista após o sorteio</label></div>
+    <div class="btn-row"><button class="btn accent" onclick="runRaffle()">Sortear</button></div>
+    <div id="winner-box"></div>
+  </div>
+`);
+function runRaffle(){
+  const box = el('raffle-in');
+  let names = box.value.split('\n').map(n=>n.trim()).filter(Boolean);
+  if(!names.length){ return; }
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  const idx = arr[0] % names.length;
+  const winner = names[idx];
+  const wb = el('winner-box');
+  wb.style.display = 'block';
+  wb.innerHTML = `🏆 ${winner}`;
+  if(el('raffle-remove').checked){
+    names.splice(idx,1);
+    box.value = names.join('\n');
+  }
+}
+
+/* =========================================================
+   17. LISTA ALEATÓRIA
+   ========================================================= */
+makeSection("lista-aleatoria", `
+  <div class="card">
+    <label for="shuffle-in">Sua lista (uma entrada por linha)</label>
+    <textarea id="shuffle-in" style="min-height:150px">Time A
+Time B
+Time C
+Time D</textarea>
+    <div class="btn-row"><button class="btn accent" onclick="runShuffle()">Embaralhar</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="shuffle-copy" onclick="copyText(el('shuffle-out').value, el('shuffle-copy'))">Copiar</button></div>
+      <textarea id="shuffle-out" readonly style="min-height:150px"></textarea>
+    </div>
+  </div>
+`);
+function runShuffle(){
+  const lines = el('shuffle-in').value.split('\n').filter(l=>l.length);
+  for(let i=lines.length-1;i>0;i--){
+    const arr = new Uint32Array(1); crypto.getRandomValues(arr);
+    const j = arr[0] % (i+1);
+    [lines[i],lines[j]] = [lines[j],lines[i]];
+  }
+  el('shuffle-out').value = lines.join('\n');
+}
+runShuffle();
+
+/* =========================================================
+   18. NÚMEROS ALEATÓRIOS
+   ========================================================= */
+makeSection("numeros-aleatorios", `
+  <div class="card">
+    <div class="row tight">
+      <div><label for="rand-min">Mínimo</label><input type="number" id="rand-min" value="1"></div>
+      <div><label for="rand-max">Máximo</label><input type="number" id="rand-max" value="100"></div>
+      <div><label for="rand-qty">Quantidade</label><input type="number" id="rand-qty" value="6" min="1"></div>
+    </div>
+    <div class="chk"><input type="checkbox" id="rand-unique" checked><label for="rand-unique" style="margin:0;text-transform:none;font-weight:400;">Não repetir números</label></div>
+    <div class="btn-row"><button class="btn accent" onclick="runRandomNumbers()">Gerar</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="rand-copy" onclick="copyText(el('rand-out').value, el('rand-copy'))">Copiar</button></div>
+      <input type="text" id="rand-out" readonly style="font-size:17px;">
+    </div>
+  </div>
+`);
+function secureRandInt(min,max){
+  const range = max-min+1;
+  const arr = new Uint32Array(1); crypto.getRandomValues(arr);
+  return min + (arr[0] % range);
+}
+function runRandomNumbers(){
+  const min = parseInt(el('rand-min').value), max = parseInt(el('rand-max').value);
+  let qty = parseInt(el('rand-qty').value);
+  const unique = el('rand-unique').checked;
+  const out = el('rand-out');
+  if(min>max){ out.value = 'Mínimo deve ser menor que o máximo'; return; }
+  if(unique && qty > (max-min+1)){ out.value = 'Quantidade maior que o intervalo disponível'; return; }
+  const results = [];
+  if(unique){
+    const pool = [];
+    for(let i=min;i<=max;i++) pool.push(i);
+    for(let i=0;i<qty;i++){
+      const arr = new Uint32Array(1); crypto.getRandomValues(arr);
+      const idx = arr[0] % pool.length;
+      results.push(pool[idx]);
+      pool.splice(idx,1);
+    }
+  } else {
+    for(let i=0;i<qty;i++) results.push(secureRandInt(min,max));
+  }
+  out.value = results.join(', ');
+}
+runRandomNumbers();
+
+/* =========================================================
+   19. LOREM IPSUM
+   ========================================================= */
+const LOREM_WORDS = ("lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore " +
+"et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea " +
+"commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla " +
+"pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum").split(' ');
+function randomWord(){ return LOREM_WORDS[secureRandInt(0, LOREM_WORDS.length-1)]; }
+function loremSentence(wordCount){
+  let words = [];
+  for(let i=0;i<wordCount;i++) words.push(randomWord());
+  words[0] = words[0][0].toUpperCase()+words[0].slice(1);
+  return words.join(' ')+'.';
+}
+function loremParagraph(sentenceCount){
+  let sentences = [];
+  for(let i=0;i<sentenceCount;i++) sentences.push(loremSentence(5+ (i%6)));
+  return sentences.join(' ');
+}
+makeSection("lorem-ipsum", `
+  <div class="card">
+    <div class="row tight">
+      <div>
+        <label for="lorem-unit">Gerar por</label>
+        <select id="lorem-unit">
+          <option value="paragraphs" selected>Parágrafos</option>
+          <option value="sentences">Frases</option>
+          <option value="words">Palavras</option>
+        </select>
+      </div>
+      <div><label for="lorem-qty">Quantidade</label><input type="number" id="lorem-qty" value="3" min="1" max="50"></div>
+      <div class="chk" style="align-self:flex-end;"><input type="checkbox" id="lorem-classic" checked><label for="lorem-classic" style="margin:0;text-transform:none;font-weight:400;">Começar com "Lorem ipsum dolor sit amet..."</label></div>
+    </div>
+    <div class="btn-row"><button class="btn accent" onclick="runLorem()">Gerar texto</button></div>
+    <div class="out-wrap">
+      <div class="out-label"><label>Resultado</label><button class="copy-btn" id="lorem-copy" onclick="copyText(el('lorem-out').value, el('lorem-copy'))">Copiar</button></div>
+      <textarea id="lorem-out" readonly style="min-height:200px"></textarea>
+    </div>
+  </div>
+`);
+function runLorem(){
+  const unit = el('lorem-unit').value;
+  const qty = Math.min(50, Math.max(1, parseInt(el('lorem-qty').value)||1));
+  const classic = el('lorem-classic').checked;
+  let result = '';
+  if(unit==='words'){
+    let words = [];
+    for(let i=0;i<qty;i++) words.push(randomWord());
+    if(classic && qty>=5){ words = "lorem ipsum dolor sit amet".split(' ').concat(words.slice(5)); }
+    words[0] = words[0][0].toUpperCase()+words[0].slice(1);
+    result = words.join(' ')+'.';
+  } else if(unit==='sentences'){
+    let sentences = [];
+    for(let i=0;i<qty;i++) sentences.push(loremSentence(6+(i%5)));
+    if(classic) sentences[0] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    result = sentences.join(' ');
+  } else {
+    let paragraphs = [];
+    for(let i=0;i<qty;i++) paragraphs.push(loremParagraph(4+(i%4)));
+    if(classic) paragraphs[0] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ' + paragraphs[0];
+    result = paragraphs.join('\n\n');
+  }
+  el('lorem-out').value = result;
+}
+runLorem();
+
+/* =========================================================
+   20. CALCULADORA DE PORCENTAGEM
+   ========================================================= */
+makeSection("calculadora-porcentagem", `
+  <div class="card">
+    <label>Quanto é <span id="pc1-p-lbl"></span>% de <span id="pc1-v-lbl"></span>?</label>
+    <div class="row tight">
+      <div><input type="number" id="pc1-p" value="20" oninput="runPercent()" placeholder="%"></div>
+      <div><input type="number" id="pc1-v" value="350" oninput="runPercent()" placeholder="valor"></div>
+    </div>
+    <div class="out-wrap"><input type="text" id="pc1-out" readonly></div>
+  </div>
+
+  <div class="card">
+    <label>X é o quanto por cento de Y?</label>
+    <div class="row tight">
+      <div><input type="number" id="pc2-x" value="70" oninput="runPercent()" placeholder="X"></div>
+      <div><input type="number" id="pc2-y" value="350" oninput="runPercent()" placeholder="Y"></div>
+    </div>
+    <div class="out-wrap"><input type="text" id="pc2-out" readonly></div>
+  </div>
+
+  <div class="card">
+    <label>Variação percentual entre dois valores</label>
+    <div class="row tight">
+      <div><input type="number" id="pc3-a" value="80" oninput="runPercent()" placeholder="Valor inicial"></div>
+      <div><input type="number" id="pc3-b" value="100" oninput="runPercent()" placeholder="Valor final"></div>
+    </div>
+    <div class="out-wrap"><input type="text" id="pc3-out" readonly></div>
+  </div>
+`);
+function runPercent(){
+  const p = parseFloat(el('pc1-p').value)||0, v = parseFloat(el('pc1-v').value)||0;
+  el('pc1-out').value = `${p}% de ${v} = ${(p/100*v).toLocaleString('pt-BR',{maximumFractionDigits:4})}`;
+
+  const x = parseFloat(el('pc2-x').value)||0, y = parseFloat(el('pc2-y').value)||1;
+  el('pc2-out').value = `${x} é ${(x/y*100).toLocaleString('pt-BR',{maximumFractionDigits:4})}% de ${y}`;
+
+  const a = parseFloat(el('pc3-a').value)||0, b = parseFloat(el('pc3-b').value)||0;
+  const diff = a!==0 ? ((b-a)/a*100) : 0;
+  const sign = diff>=0 ? 'aumento' : 'redução';
+  el('pc3-out').value = `${Math.abs(diff).toLocaleString('pt-BR',{maximumFractionDigits:4})}% de ${sign} (de ${a} para ${b})`;
+}
+runPercent();
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+selectTool('inverter-texto');
+</script>
+</body>
+</html>
